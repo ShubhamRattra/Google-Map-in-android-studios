@@ -8,9 +8,15 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -29,6 +35,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -42,6 +51,8 @@ public class MapsActivity extends FragmentActivity implements
     private Location lastLocation;
     private Marker currentUerLocationMarker;
     private static final int Request_User_Location_Code = 99;
+    private double latitiude, longitude;
+    private int ProximityRadius=10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +70,92 @@ public class MapsActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
     }
 
+
+    public void onclick(View v)
+    {
+        String restaurants = "restaurants";
+        Object transferData[] = new Object[2];
+        GetNearbyPlaces getNearbyPlaces = new GetNearbyPlaces();
+
+
+        switch (v.getId())
+        {
+            case R.id.search_address:
+                EditText addressField = (EditText) findViewById(R.id.loction_search);
+                String address = addressField.getText().toString();
+
+                List<Address> addressList=null;
+                MarkerOptions userMarkerOption = new MarkerOptions();
+
+                if(!TextUtils.isEmpty(address))
+                {
+                    Geocoder geocoder = new Geocoder(this) ;
+
+                    try
+                    {
+                        addressList = geocoder.getFromLocationName(address,6);
+
+                        if (address != null)
+                        {
+                            for (int i=0; i<addressList.size(); i++)
+                            {
+                                Address userAddress = addressList.get(i);
+                                LatLng latLng = new LatLng(userAddress.getLatitude(),userAddress.getLongitude());
+
+                                userMarkerOption.position(latLng);
+                                userMarkerOption.title(address);
+                                userMarkerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                                mMap.addMarker(userMarkerOption);
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                            }
+                        }
+                        else
+                            {
+                                Toast.makeText(this,"Location not found ....",Toast.LENGTH_SHORT).show();
+                            }
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                else
+                    {
+                        Toast.makeText(this,"please write location name ...",Toast.LENGTH_SHORT).show();
+                    }
+
+               break;
+
+            case R.id.restaurants_nearby:
+             mMap.clear();
+             String url = getURL(latitiude, longitude, restaurants);
+             transferData[0] = mMap;
+             transferData[1] = url;
+
+             getNearbyPlaces.execute(transferData);
+             Toast.makeText(this,"Searching for nearby resstaurants...",Toast.LENGTH_SHORT).show();
+             Toast.makeText(this,"showing nearby resstaurants...",Toast.LENGTH_SHORT).show();
+
+
+             break;
+        }
+    }
+
+
+    private String getURL(double latitiude, double longitude, String nearbyPlace)
+    {
+        StringBuilder googleURL = new StringBuilder("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
+        googleURL.append("location="+latitiude+","+longitude);
+        googleURL.append("&radius"+ProximityRadius);
+        googleURL.append("&type="+nearbyPlace);
+        googleURL.append("&sensor=true");
+        googleURL.append("&key"+"AIzaSyDW4g7t5hL4oKvQn-L4Cktnt2lgXbsdvKs");
+
+        Log.d("GoogleMapsActivity","url = "+googleURL.toString());
+
+        return googleURL.toString();
+    }
 
 
     @Override
@@ -129,7 +226,11 @@ public class MapsActivity extends FragmentActivity implements
 
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(Location location)
+    {
+        latitiude = location.getLatitude();
+        longitude = location.getLongitude();
+
         lastLocation = location;
 
         if (currentUerLocationMarker != null)
