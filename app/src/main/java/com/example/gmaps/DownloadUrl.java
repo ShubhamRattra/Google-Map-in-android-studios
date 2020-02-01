@@ -11,10 +11,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class DownloadUrl
-{
-    public String ReadTheUrl(String placeURL) throws IOException
-    {
+public class DownloadUrl {
+    public String ReadTheURL(String placeURL) throws IOException {
         String Data = "";
         InputStream inputStream = null;
         HttpURLConnection httpURLConnection = null;
@@ -36,20 +34,15 @@ public class DownloadUrl
 
             Data = stringBuffer.toString();
             bufferedReader.close();
-        }
-        catch (MalformedURLException e)
-        {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             inputStream.close();
             httpURLConnection.disconnect();
         }
+
         return Data;
     }
 }

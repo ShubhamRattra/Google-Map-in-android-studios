@@ -42,8 +42,7 @@ public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener
-{
+        LocationListener {
 
     private GoogleMap mMap;
     private GoogleApiClient googleApiClient;
@@ -52,15 +51,14 @@ public class MapsActivity extends FragmentActivity implements
     private Marker currentUerLocationMarker;
     private static final int Request_User_Location_Code = 99;
     private double latitiude, longitude;
-    private int ProximityRadius=10000;
+    private int ProximityRadius = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkUserLocationPermission();
         }
 
@@ -71,36 +69,31 @@ public class MapsActivity extends FragmentActivity implements
     }
 
 
-    public void onclick(View v)
-    {
+    public void onClick(View v) {
         String restaurants = "restaurants";
         Object transferData[] = new Object[2];
         GetNearbyPlaces getNearbyPlaces = new GetNearbyPlaces();
 
 
-        switch (v.getId())
-        {
+
+        switch (v.getId()) {
             case R.id.search_address:
                 EditText addressField = (EditText) findViewById(R.id.loction_search);
                 String address = addressField.getText().toString();
 
-                List<Address> addressList=null;
+                List<Address> addressList = null;
                 MarkerOptions userMarkerOption = new MarkerOptions();
 
-                if(!TextUtils.isEmpty(address))
-                {
-                    Geocoder geocoder = new Geocoder(this) ;
+                if (!TextUtils.isEmpty(address)) {
+                    Geocoder geocoder = new Geocoder(this);
 
-                    try
-                    {
-                        addressList = geocoder.getFromLocationName(address,6);
+                    try {
+                        addressList = geocoder.getFromLocationName(address, 6);
 
-                        if (address != null)
-                        {
-                            for (int i=0; i<addressList.size(); i++)
-                            {
+                        if (address != null) {
+                            for (int i = 0; i < addressList.size(); i++) {
                                 Address userAddress = addressList.get(i);
-                                LatLng latLng = new LatLng(userAddress.getLatitude(),userAddress.getLongitude());
+                                LatLng latLng = new LatLng(userAddress.getLatitude(), userAddress.getLongitude());
 
                                 userMarkerOption.position(latLng);
                                 userMarkerOption.title(address);
@@ -109,50 +102,43 @@ public class MapsActivity extends FragmentActivity implements
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                                 mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
                             }
+                        } else {
+                            Toast.makeText(this, "Location not found ....", Toast.LENGTH_SHORT).show();
                         }
-                        else
-                            {
-                                Toast.makeText(this,"Location not found ....",Toast.LENGTH_SHORT).show();
-                            }
-                    }
-                    catch (IOException e)
-                    {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    Toast.makeText(this, "please write location name ...", Toast.LENGTH_SHORT).show();
                 }
-                else
-                    {
-                        Toast.makeText(this,"please write location name ...",Toast.LENGTH_SHORT).show();
-                    }
 
-               break;
+                break;
 
             case R.id.restaurants_nearby:
-             mMap.clear();
-             String url = getURL(latitiude, longitude, restaurants);
-             transferData[0] = mMap;
-             transferData[1] = url;
+                mMap.clear();
+                String url = getURL(latitiude, longitude, restaurants);
+                transferData[0] = mMap;
+                transferData[1] = url;
 
-             getNearbyPlaces.execute(transferData);
-             Toast.makeText(this,"Searching for nearby resstaurants...",Toast.LENGTH_SHORT).show();
-             Toast.makeText(this,"showing nearby resstaurants...",Toast.LENGTH_SHORT).show();
+                getNearbyPlaces.execute(transferData);
+                Toast.makeText(this, "Searching for nearby restaurants...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "showing nearby restaurants...", Toast.LENGTH_SHORT).show();
 
 
-             break;
+                break;
         }
     }
 
 
-    private String getURL(double latitiude, double longitude, String nearbyPlace)
-    {
+    private String getURL(double latitiude, double longitude, String nearbyPlace) {
         StringBuilder googleURL = new StringBuilder("https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
-        googleURL.append("location="+latitiude+","+longitude);
-        googleURL.append("&radius"+ProximityRadius);
-        googleURL.append("&type="+nearbyPlace);
+        googleURL.append("location=" + latitiude + "," + longitude);
+        googleURL.append("&radius" + ProximityRadius);
+        googleURL.append("&type=" + nearbyPlace);
         googleURL.append("&sensor=true");
-        googleURL.append("&key"+"AIzaSyDW4g7t5hL4oKvQn-L4Cktnt2lgXbsdvKs");
+        googleURL.append("&key" + "AIzaSyDW4g7t5hL4oKvQn-L4Cktnt2lgXbsdvKs");
 
-        Log.d("GoogleMapsActivity","url = "+googleURL.toString());
+        Log.d("GoogleMapsActivity", "url = " + googleURL.toString());
 
         return googleURL.toString();
     }
@@ -162,83 +148,68 @@ public class MapsActivity extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             buildGoogleApiClient();
 
-        mMap.setMyLocationEnabled(true);
+            mMap.setMyLocationEnabled(true);
         }
     }
 
-    public boolean checkUserLocationPermission(){
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION))
-            {
-                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},Request_User_Location_Code );
+    public boolean checkUserLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_User_Location_Code);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_User_Location_Code);
             }
-            else
-                {
-                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},Request_User_Location_Code );
-                }
             return false;
-        }
-        else
-        {
+        } else {
             return true;
         }
-}
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case Request_User_Location_Code:
-                if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                { if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-                {
-                    if (googleApiClient == null)
-                    {
-                        buildGoogleApiClient();
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        if (googleApiClient == null) {
+                            buildGoogleApiClient();
+                        }
+                        mMap.setMyLocationEnabled(true);
                     }
-                    mMap.setMyLocationEnabled(true);
-                }
-                }
-                else
-                {
-                    Toast.makeText(this,"Permission Denied...",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Permission Denied...", Toast.LENGTH_SHORT).show();
                 }
                 return;
         }
     }
 
-    protected synchronized void buildGoogleApiClient()
-        {
-            googleApiClient = new GoogleApiClient.Builder(this)
-            .addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this)
-            .addApi(LocationServices.API)
-            .build();
+    protected synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
 
-            googleApiClient.connect();
-        }
+        googleApiClient.connect();
+    }
 
 
     @Override
-    public void onLocationChanged(Location location)
-    {
+    public void onLocationChanged(Location location) {
         latitiude = location.getLatitude();
         longitude = location.getLongitude();
 
         lastLocation = location;
 
-        if (currentUerLocationMarker != null)
-        {
+        if (currentUerLocationMarker != null) {
             currentUerLocationMarker.remove();
         }
 
-        LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -250,24 +221,22 @@ public class MapsActivity extends FragmentActivity implements
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(12));
 
-        if(googleApiClient != null)
-        {
-            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient,this);
+        if (googleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         }
 
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-       locationRequest = new LocationRequest();
-       locationRequest.setInterval(1100);
-       locationRequest.setFastestInterval(1100);
-       locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(1100);
+        locationRequest.setFastestInterval(1100);
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
-       if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-       {
-           LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-       }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+        }
     }
 
     @Override
